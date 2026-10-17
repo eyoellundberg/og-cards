@@ -3,7 +3,7 @@
 export type Spec = { brand: string; ink: string };
 
 // The bytes a card is drawn from; each Worker loads them its own way (Vite's ?inline, Wrangler's Data modules).
-// text: the brand and kicker (regular 400, semibold 600); title: the display face.
+// text: the brand and kicker (semibold 600; regular 400 is loaded too); title: the display face.
 export type Assets = { ground: ArrayBuffer; regular: ArrayBuffer; semibold: ArrayBuffer; title: ArrayBuffer };
 
 export type Text = { title: string; kicker: string };
@@ -15,10 +15,11 @@ const div = (style: Record<string, string | number>, children: (Node | string)[]
 // 1200x630: the brand top left; the kicker and the title at the bottom.
 export function layout(text: Text, spec: Spec, ground: string): Node {
   const bottom = [div({ maxWidth: 980, fontFamily: "title", fontSize: 84, fontWeight: 500, lineHeight: 1, letterSpacing: "-0.02em" }, text.title)];
-  if (text.kicker) bottom.unshift(div({ fontSize: 26, fontWeight: 400, marginBottom: 20 }, text.kicker));
+  // The kicker is semibold and both it and the brand are tracked in a little, as text on the site is; regular at 0 tracking reads as loose words.
+  if (text.kicker) bottom.unshift(div({ fontSize: 28, fontWeight: 600, letterSpacing: "-0.02em", marginBottom: 20 }, text.kicker));
   return div(
     { flexDirection: "column", justifyContent: "space-between", width: 1200, height: 630, padding: "72px 80px", color: spec.ink, fontFamily: "text", backgroundImage: `url(${ground})`, backgroundSize: "1200px 630px" },
-    [div({ fontSize: 34, fontWeight: 600 }, spec.brand), div({ flexDirection: "column" }, bottom)],
+    [div({ fontSize: 34, fontWeight: 600, letterSpacing: "-0.025em" }, spec.brand), div({ flexDirection: "column" }, bottom)],
   );
 }
 
