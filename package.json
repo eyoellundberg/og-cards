@@ -2,6 +2,7 @@
   "name": "og-cards",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Open Graph share cards for any project: a dithered ground drawn once from the project's CSS colors, a title set on it at request time in a Cloudflare Worker.",
   "engines": { "node": ">=22" },

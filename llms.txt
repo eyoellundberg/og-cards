@@ -1,0 +1,39 @@
+# og-cards
+
+> Open Graph share cards (1200x630 PNG) for a Cloudflare Worker. The ground is drawn once at build time from the
+> project's CSS color tokens; the Worker sets brand, kicker and title on it per request (satori + resvg-wasm via
+> workers-og). Cards are ~300–350 KB.
+
+## Add it to a project
+
+1. `npm install github:eyoellundberg/og-cards`
+2. Write `og-cards.json` beside the fonts. Paths are relative to it:
+   `{ "brand": "Acme", "css": "../src/theme.css", "look": "hero", "colors": { "paper": "white", "accent": "accent", "ink": "ink" }, "fonts": { "regular": "Inter-Regular.ttf", "semibold": "Inter-SemiBold.ttf", "title": "Display.otf" } }`
+   - `css`: a file with `--color-NAME: #hex` declarations (e.g. Tailwind 4 `@theme`). The first value of each token wins.
+   - `colors`: the token NAME (without `--color-`) for each role. Text is set in `ink`.
+   - `look`: `hero` (pale ground, accent lines) or `blue` (accent ground, deeper lines).
+   - `fonts`: TTF or OTF (satori cannot read woff2). regular = 400, semibold = 600, title = the display face.
+3. `npx og-cards generate path/to/og-cards.json` writes `ground.png` and `card.json` next to it. Commit both.
+4. In the Worker:
+   ```ts
+   import { og, card } from "og-cards";
+   import spec from "./og/card.json";
+   const assets = { ground, regular, semibold, title }; // ArrayBuffers: Wrangler Data modules ("rules": [{ "type": "Data", "globs": ["**/*.ttf", "**/*.otf", "**/*.png"] }]) or Vite ?inline decoded
+   if (url.pathname === "/og") return og(request, spec, assets, ctx); // GET /og?title=&kicker=, 400 without title, edge-cached a year
+   return card({ title, kicker }, spec, assets); // a card of your own text
+   ```
+5. Point `<meta property="og:image">` at `/og?title=...&kicker=...`.
+
+## Rules
+
+- Never hardcode a hex in the project: change the CSS, then run `generate` again.
+- The edge cache keys on the URL. After a look or color change, old URLs keep the old card. Add a query param to bust it.
+- Before changing a look, run `npx og-cards sheet <config> "<title>"`. It writes sheet.png with every look and its real card size. Keep cards under 450 KB.
+
+## Files
+
+- [README.md](README.md): the same hookup for people
+- [src/looks.ts](src/looks.ts): the looks. A new look is a function `(x, y, colors) => [r, g, b]` over uv (centred, y up, 1 = image height), added to `LOOKS`.
+- [src/worker.ts](src/worker.ts): `og` and `card`, the Worker entry
+- [src/cli.ts](src/cli.ts): `generate`, `preview`, `sheet`
+- [tests/og.test.ts](tests/og.test.ts): `npm test`
