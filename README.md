@@ -36,7 +36,8 @@ neighbour, so the dots stay crisp and the card stays small (~300–350 KB).
    if (url.pathname === "/og") return og(request, spec, { ground, regular, semibold, title }, ctx);
    ```
 
-   `/og?title=&kicker=` answers with the PNG, cached at the edge for a year. For a card of your own text, call
+   `/og?title=&kicker=&v=` answers with the PNG, cached at the edge for a year. Build the og:image URL with
+   `ogPath({ title, kicker }, spec)`: its `v=` changes whenever the card looks different, so no cache serves an old one. For a card of your own text, call
    `card({ title, kicker }, spec, assets)`.
 
 ## CLI

@@ -1,6 +1,11 @@
 // What `og-cards generate` writes next to the ground (card.json): the brand on the card and the ink it is set in, read
 // from the project's CSS. The Worker imports it, so a card never holds a color the CSS does not.
-export type Spec = { brand: string; ink: string };
+// version: a short hash of the layout, the brand, the ink and the ground, put in every card URL (ogPath), so a card that
+// looks different has a new URL and no cache (the edge's, a social network's) serves the old one.
+export type Spec = { brand: string; ink: string; version: string };
+
+// Bump when layout() or fonts() change: it is part of the version.
+export const LAYOUT = "2";
 
 // The bytes a card is drawn from; each Worker loads them its own way (Vite's ?inline, Wrangler's Data modules).
 // text: the brand and kicker (semibold 600; regular 400 is loaded too); title: the display face.
@@ -28,6 +33,14 @@ export const fonts = (a: Assets) => [
   { name: "text", data: a.semibold, weight: 600 as const, style: "normal" as const },
   { name: "title", data: a.title, weight: 500 as const, style: "normal" as const },
 ];
+
+// The path of a card for og:image: its text and the spec's version, so a changed card has a new URL.
+export function ogPath(text: Text, spec: Spec): string {
+  const q = new URLSearchParams({ title: text.title });
+  if (text.kicker) q.set("kicker", text.kicker);
+  q.set("v", spec.version);
+  return `/og?${q.toString().replace(/\+/g, "%20")}`;
+}
 
 // The title and kicker of GET /og?title=&kicker=; null without a title. The title is cut at 90 characters.
 export function readText(url: URL): Text | null {

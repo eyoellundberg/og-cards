@@ -22,7 +22,7 @@
    if (url.pathname === "/og") return og(request, spec, assets, ctx); // GET /og?title=&kicker=, 400 without title, edge-cached a year
    return card({ title, kicker }, spec, assets); // a card of your own text
    ```
-5. Point `<meta property="og:image">` at `/og?title=...&kicker=...`.
+5. Point `<meta property="og:image">` at `origin + ogPath({ title, kicker }, spec)`: it carries `v=` (the card's version), so after `generate` or an og-cards update every card gets a new URL and no cache serves the old one.
 
 ## Rules
 

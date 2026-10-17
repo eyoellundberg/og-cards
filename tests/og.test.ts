@@ -4,7 +4,7 @@ import { color, colors, hex } from "../src/css.js";
 import { assets, load, spec } from "../src/config.js";
 import { ground, png, WIDTH, HEIGHT } from "../src/ground.js";
 import { LOOKS } from "../src/looks.js";
-import { readText } from "../src/card.js";
+import { ogPath, readText } from "../src/card.js";
 import { renderCard } from "../src/render.js";
 
 const config = load(new URL("fixtures/og-cards.json", import.meta.url).pathname);
@@ -48,11 +48,17 @@ describe("card", () => {
     expect(readText(new URL("https://x/og?kicker=Yo"))).toBeNull();
   });
   it("sets the text in the CSS ink", () => {
-    expect(spec(config)).toEqual({ brand: "Acme", ink: "#050505" });
+    const g = png(ground(LOOKS.hero, config.colors));
+    expect(spec(config, g)).toMatchObject({ brand: "Acme", ink: "#050505", version: expect.stringMatching(/^[0-9a-f]{10}$/) });
+  });
+  it("puts the version in the card URL, and a different ground gives a different version", () => {
+    const a = spec(config, png(ground(LOOKS.hero, config.colors))), b = spec(config, png(ground(LOOKS.blue, config.colors)));
+    expect(a.version).not.toBe(b.version);
+    expect(ogPath({ title: "Hi there", kicker: "" }, a)).toBe(`/og?title=Hi%20there&v=${a.version}`);
   });
   it("renders each look as a 1200x630 PNG under 450 KB", async () => {
     for (const look of Object.values(LOOKS)) {
-      const out = Buffer.from(await renderCard({ title: "Forecast for 2026", kicker: "Invoice from Acme" }, spec(config), assets(config, png(ground(look, config.colors)))));
+      const out = Buffer.from(await renderCard({ title: "Forecast for 2026", kicker: "Invoice from Acme" }, spec(config, png(ground(look, config.colors))), assets(config, png(ground(look, config.colors)))));
       expect([out.readUInt32BE(16), out.readUInt32BE(20)]).toEqual([1200, 630]);
       expect(out.length).toBeLessThan(450 * 1024);
     }

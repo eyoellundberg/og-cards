@@ -1,6 +1,8 @@
 import { ImageResponse } from "workers-og";
 import { dataUrl, fonts, layout, readText, type Assets, type Spec, type Text } from "./card.js";
 
+export { ogPath } from "./card.js";
+
 export type { Assets, Spec, Text };
 
 // The ground as a data URL, made once per isolate.
@@ -13,7 +15,7 @@ export function card(text: Text, spec: Spec, assets: Assets): Response {
   return new Response(image.body, { headers: { "content-type": "image/png" } });
 }
 
-// GET /og?title=&kicker=: the card, cached at the edge for a year (the same query is the same card); 400 without a title.
+// GET /og?title=&kicker=&v=: the card, cached at the edge for a year (the same query is the same card); 400 without a title.
 export async function og(request: Request, spec: Spec, assets: Assets, ctx: { waitUntil(p: Promise<unknown>): void }): Promise<Response> {
   const text = readText(new URL(request.url));
   if (!text) return new Response("title is required", { status: 400 });
