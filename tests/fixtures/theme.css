@@ -1,0 +1,9 @@
+@theme {
+  --color-accent: #3aa6fb;
+  --color-white: #fff;
+  --color-ink: #050505;
+}
+:root[data-theme="dark"] {
+  --color-white: #090909;
+  --color-ink: #ffffff;
+}

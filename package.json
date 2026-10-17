@@ -1,0 +1,26 @@
+{
+  "name": "og-cards",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Open Graph share cards for any project: a dithered ground drawn once from the project's CSS colors, a title set on it at request time in a Cloudflare Worker.",
+  "engines": { "node": ">=22" },
+  "exports": { ".": "./src/worker.ts" },
+  "bin": { "og-cards": "./src/cli.ts" },
+  "files": ["src"],
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "2.4.0",
+    "satori": "0.15.2",
+    "tsx": "^4.23.15",
+    "workers-og": "0.0.27"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
